@@ -1,0 +1,31 @@
+Notes
+- imported into postgres database using pgfutter
+./pgfutter  --host whitewalker.cgdtqi20ig9l.us-east-2.rds.amazonaws.com --port 5432  --username jameswalker  --pass jamesoliver69  --dbname aledade csv ~/Downloads/AnalyticsExerciseData/physician_compare.csv
+
+begin data validation physician_compare
+
+- some phone numbers are in exponential format
+select phone_number --3.02734E+12
+from import.physician_compare
+where pac_id = '6608847975'
+
+-Address and phone number differences causing duplication of rows
+select *
+from import.physician_compare
+where pac_id = '6608847975'
+
+-- pgfutter imported nulls as blank characters. Cleaning up...
+RAN INTO ISSUES. STEPPING BACK. 
+
+-- blank in graduation_year
+-- total_services is decimal 16214.3
+-- drug_suppress_indicator strage character types? # and *
+-- med_suppress_indicator SAME AS ABOVE
+
+- WHAT IS beneficiary_average_risk_score
+- Used decimals to be safe since data not clean/consistent
+
+physician_supplier_agg
+--nppes_provider_street1 messy
+22830 & 22832 SUSSEX HIGHWAY 
+
