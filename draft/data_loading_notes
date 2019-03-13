@@ -29,3 +29,10 @@ physician_supplier_agg
 --nppes_provider_street1 messy
 22830 & 22832 SUSSEX HIGHWAY 
 
+-- verified one NPI per pac_id 
+select pac_id, count(distinct npi) as npt_ct
+from physician_compare
+group by pac_id
+order by count(distinct npi) desc
+
+- data not specified for year 2016. we don't know what's current and not. 
