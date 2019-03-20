@@ -94,6 +94,7 @@ SELECT
 FROM 
    temp_primary_care
    
+-- SELECT * FROM temp_primary_care
 
 ----------------------------------------------------------------------
                            

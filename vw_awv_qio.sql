@@ -1,7 +1,4 @@
-DROP TABLE IF EXISTS temp_primary_npis;
-
--- Creating a row for each NPI by practice
-CREATE TEMP TABLE temp_primary_npis AS
+WITH temp_primary_npis AS (
 SELECT 
    pcp.practice_pac_id, 
    pcp.practice_type, 
@@ -24,15 +21,8 @@ FROM
 JOIN 
 -- Joining on pac_id will return only Solo Practices
    physician_compare pc 
-ON pcp.pac_id = pc.pac_id;
-
-
--- Creating multi-use result set for further aggregation within a BI tool
-DROP TABLE IF EXISTS temp_results;
-
--- Creating a row for each NPI by practice
-CREATE TEMP TABLE temp_results AS
-
+ON pcp.pac_id = pc.pac_id
+)
 SELECT DISTINCT 
    tpn.practice_pac_id, 
    tpn.practice_type,
@@ -45,6 +35,9 @@ SELECT DISTINCT
    tpn.primary_specialty,
    awv.total_awv, -- Total AWV performed by NPI
    psa.total_unique_benes, 
+   psa.total_medicare_allowed_amt,
+   (psa.total_medicare_allowed_amt/psa.total_unique_benes) AS avg_cost_per_bene,
+   psa.beneficiary_average_risk_score,
    (coalesce(awv.total_awv, 0)/coalesce(psa.total_unique_benes, 0)) AS pct_awv,
    avg_average_medicare_payment_amt  --NOTE: Average of averages is never preferred. 
 FROM 
@@ -82,7 +75,7 @@ LEFT JOIN
    physician_supplier_agg psa
 ON tpn.npi = psa.npi
 WHERE 
-   primary_specialty IN ( --target PCPs and PA/NP
+   tpn.primary_specialty IN ( --target PCPs and PA/NP
       'INTERNAL MEDICINE',
       'FAMILY PRACTICE',
       'OBSTETRICS/GYNECOLOGY',
@@ -94,8 +87,5 @@ WHERE
       'PHYSICIAN ASSISTANT')
    AND psa.medicare_participation_indicator = 'Y'  -- Assuming we'll only engage Y NPIs
 ORDER BY 
-   practice_awv_count DESC, 
-   practice_pac_id, 
-   total_awv DESC;
+   beneficiary_average_risk_score DESC;
 
-SELECT * FROM temp_results;
