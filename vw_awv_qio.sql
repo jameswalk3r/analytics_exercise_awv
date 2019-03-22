@@ -36,6 +36,8 @@ SELECT DISTINCT
    awv.total_awv, -- Total AWV performed by NPI
    psa.total_unique_benes, 
    psa.total_medicare_allowed_amt,
+   -- Note: AVG COST FOR NPI SPEND ONLY. NOT REPRESENTATIVE OF OVER BENE AVG COST
+      --This would be removed to prevent improper use but will leave for exercise
    (psa.total_medicare_allowed_amt/psa.total_unique_benes) AS avg_cost_per_bene,
    psa.beneficiary_average_risk_score,
    (coalesce(awv.total_awv, 0)/coalesce(psa.total_unique_benes, 0)) AS pct_awv,
@@ -47,6 +49,7 @@ LEFT JOIN
    SELECT 
       npi,
       sum(line_srvc_cnt) AS total_awv,
+      --NOTE: Average of averages is never preferred.
       avg(cast(average_medicare_payment_amt AS decimal)) AS avg_average_medicare_payment_amt
    FROM physician_supplier_hcpcs
    WHERE hcpcs_code IN ('G0438','G0439','G0468')
